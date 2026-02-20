@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trading Research Desktop</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #0f172a; color: #e2e8f0; }
+      .wrap { padding: 20px; max-width: 1100px; margin: 0 auto; }
+      .card { background: #111827; border: 1px solid #334155; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+      input, select, button, textarea { padding: 8px; border-radius: 8px; border: 1px solid #475569; background: #0b1220; color: #e2e8f0; }
+      button { cursor: pointer; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+      th, td { border-bottom: 1px solid #334155; padding: 8px; text-align: left; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Trading Research Desktop</h1>
+      <div class="card">
+        <h2>Settings</h2>
+        <div class="grid">
+          <label>Binance API Key <input id="binanceApiKey" /></label>
+          <label>Oanda API Key <input id="oandaApiKey" /></label>
+          <label>CME API Key <input id="cmeApiKey" /></label>
+          <label>Default Market
+            <select id="defaultMarket">
+              <option value="crypto">crypto</option>
+              <option value="forex">forex</option>
+              <option value="futures">futures</option>
+            </select>
+          </label>
+          <label>Default Timeframe
+            <select id="defaultTimeframe">
+              <option value="1m">1m</option><option value="5m">5m</option>
+              <option value="1h">1h</option><option value="1d">1d</option><option value="1w">1w</option>
+            </select>
+          </label>
+          <label>Assets (comma separated)
+            <input id="defaultAssets" />
+          </label>
+        </div>
+        <p><button id="saveSettings">Save Settings</button></p>
+        <small id="settingsStatus"></small>
+      </div>
+
+      <div class="card">
+        <h2>Run Analysis</h2>
+        <button id="analyzeBtn">Analyze</button>
+        <pre id="output">Click Analyze to load recommendations...</pre>
+      </div>
+
+      <div id="tables"></div>
+    </div>
+
+    <script src="./renderer.js"></script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+.next/
+.env
+.DS_Store
+
+backend/app/local_state.db
