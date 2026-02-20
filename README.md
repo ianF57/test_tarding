@@ -1,78 +1,75 @@
-# Trading Research — Click-to-Run Desktop App
+# Trading Research & Strategy Automation
 
-This repository now includes a **consumer-style packaged desktop version** of the trading research system.
+Full-stack app for strategy generation, backtesting, market regime detection, and strategy recommendation across crypto, forex, and futures.
 
-## What changed
-- No SSH workflow required
-- No Docker required
-- No manual database setup required
-- Backend and UI are bundled for desktop use
-- Local SQLite settings storage (for API keys + defaults)
+## Stack
+- Backend: FastAPI, Pandas, NumPy, scikit-learn, Optuna
+- Frontend: Next.js + React + Chart.js
+- Database: PostgreSQL (compose service ready)
+- Data connectors: Binance live REST + pluggable connectors (Oanda/CME scaffold)
 
-## Desktop packaging architecture
-- **Desktop shell:** Electron (`desktop/`)
-- **Backend:** FastAPI (`backend/`), launched automatically by Electron on app start
-- **UI:** Electron renderer (`desktop/renderer/`) displayed inside the app window
-- **Local DB:** SQLite (`backend/app/local_state.db`) for app settings
+## What this app does
+For each requested asset/timeframe, the backend returns:
+- Current detected market regime
+- Top 3 ranked strategies
+- Expected annualized return
+- Max drawdown
+- Suggested trade direction (long/short/neutral)
+- Confidence score (0-100)
 
-## Zero-terminal end-user behavior
-After packaging and installing:
-1. User double-clicks app icon.
-2. Electron auto-starts backend on localhost.
-3. App opens desktop window with analysis + settings UI.
-4. User configures API keys inside the app (no `.env` needed).
+## Implemented features
+- Rule-based strategy generation using EMA/SMA/MACD/RSI/Stochastic/ATR/Bollinger and a volume-based OBV strategy.
+- Parameter optimization with Optuna for selected strategies.
+- Backtesting with transaction costs, slippage, position sizing, and metrics:
+  - CAGR, Sharpe, Sortino, Max Drawdown, Win Rate, Profit Factor.
+- Market regime detection:
+  - trending vs ranging and high-vol vs low-vol via ADX + rolling volatility clustering (KMeans).
+- Recommendation engine ranking by risk-adjusted profile and regime fit.
+- Configurable timeframes: 1m, 5m, 1h, 1d, 1w.
+- Async market data fetching for multiple assets per request.
 
-## Settings UI (inside app)
-Included fields:
-- Binance API key / secret
-- Oanda API key
-- CME API key
-- Default market
-- Default timeframe
-- Default assets list
+## How to open and use this
 
-These are persisted locally in SQLite through:
-- `GET /api/settings`
-- `PUT /api/settings`
-
-## Build in one command
-
-### Desktop (cross-platform package)
+### Option A (quickest): one command helper
 ```bash
-./scripts/build_desktop.sh
+./scripts/open_and_use.sh
+```
+Then open:
+- Frontend dashboard: `http://localhost:3000`
+- Backend docs (Swagger): `http://localhost:8000/docs`
+
+### Option B: manual Docker Compose
+```bash
+docker compose up -d
 ```
 
-### Windows installer (.exe / NSIS)
-```bat
-scripts\build_windows.bat
+Check health:
+```bash
+curl http://localhost:8000/api/health
 ```
 
-### macOS DMG (on macOS host)
+Open UI:
+- `http://localhost:3000`
+- Click **Analyze Market**
+
+Stop services:
 ```bash
-cd desktop && npm run dist:mac
+docker compose down
 ```
 
-## Optional mobile wrapper (Capacitor)
-A lightweight Android wrapper is included in `mobile-capacitor/`.
-
-### Build Android APK (debug)
+## API example
 ```bash
-./scripts/build_android.sh
-```
-
-APK output:
-- `mobile-capacitor/android/app/build/outputs/apk/debug/app-debug.apk`
-
-> For signed production APK/AAB, open Android project and configure release signing.
-
-## Run desktop app in dev mode
-```bash
-cd desktop
-npm install
-npm run start
+curl -X POST http://localhost:8000/api/recommendations \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "assets": ["BTCUSDT", "ETHUSDT", "BNBUSDT"],
+    "market": "crypto",
+    "timeframe": "1h",
+    "lookback_bars": 500
+  }'
 ```
 
 ## Notes
-- App runs offline except for market data API calls.
-- Forex/futures connectors still use synthetic fallback data unless real provider integrations are wired.
-- PostgreSQL and Docker are no longer required for standalone local usage.
+- `market: crypto` uses Binance live data.
+- `market: forex` and `market: futures` currently use synthetic fallback connectors unless real Oanda/CME connectors are wired.
+- Live trade execution is intentionally out of scope for this version.

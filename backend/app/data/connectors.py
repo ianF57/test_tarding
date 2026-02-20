@@ -7,8 +7,6 @@ import httpx
 import numpy as np
 import pandas as pd
 
-from app.settings.store import store
-
 
 @dataclass
 class BaseConnector:
@@ -27,14 +25,8 @@ class BinanceConnector(BaseConnector):
         interval = interval_map.get(timeframe, "1h")
         url = "https://api.binance.com/api/v3/klines"
         params = {"symbol": symbol, "interval": interval, "limit": min(limit, 1000)}
-
-        settings = store.get_all()
-        headers = {}
-        if settings.get("binance_api_key"):
-            headers["X-MBX-APIKEY"] = settings["binance_api_key"]
-
-        async with httpx.AsyncClient(timeout=20) as client:
-            r = await client.get(url, params=params, headers=headers)
+        async with httpx.AsyncClient(timeout=15) as client:
+            r = await client.get(url, params=params)
             r.raise_for_status()
             rows = r.json()
 
@@ -62,6 +54,8 @@ class BinanceConnector(BaseConnector):
 
 
 class SyntheticConnector(BaseConnector):
+    """Fallback connector for forex/futures when APIs are not configured."""
+
     def __init__(self, name: str) -> None:
         super().__init__(name=name)
 

@@ -8,8 +8,6 @@ from app.data.connectors import get_connector
 from app.regime.detector import detect_regime
 from app.recommendation.engine import recommend
 from app.schemas.models import AssetRecommendation, RecommendationRequest
-from app.schemas.settings import AppSettings, AppSettingsUpdate
-from app.settings.store import store
 from app.strategies.generator import base_strategies, optimize_parameters
 
 router = APIRouter(prefix="/api", tags=["research"])
@@ -18,20 +16,6 @@ router = APIRouter(prefix="/api", tags=["research"])
 @router.get("/health")
 async def health() -> dict:
     return {"status": "ok"}
-
-
-@router.get("/settings", response_model=AppSettings)
-async def get_settings() -> AppSettings:
-    return AppSettings(**store.get_all())
-
-
-@router.put("/settings", response_model=AppSettings)
-async def update_settings(payload: AppSettingsUpdate) -> AppSettings:
-    updates = payload.model_dump(exclude_none=True)
-    current = store.get_all()
-    current.update(updates)
-    store.update_many(current)
-    return AppSettings(**store.get_all())
 
 
 @router.post("/recommendations", response_model=list[AssetRecommendation])
